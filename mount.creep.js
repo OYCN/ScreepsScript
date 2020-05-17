@@ -29,7 +29,10 @@ module.exports = function () {
         const working = creepConfig.switch ? creepConfig.switch(this) : true
         // 执行对应操作
         if (working) {
-            if (creepConfig.target) creepConfig.target(this, allTasks)
+            if (creepConfig.target && creepConfig.target(this, allTasks) == true) 
+                if(Game.flags[this.memory.role + '_wait']){
+                    this.moveTo(Game.flags[this.memory.role + '_wait'].pos);
+                }
         }
         else {
             if (creepConfig.source) creepConfig.source(this, allTasks)

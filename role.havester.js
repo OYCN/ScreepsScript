@@ -8,13 +8,14 @@
 module.exports = (sourceId, fromRoomName) => ({
     // 采集能量矿
     source: (creep, allTasks)  => {
-        tasks = allTasks[fromRoomName];
+        //var tasks = allTasks[fromRoomName];
         const source = Game.getObjectById(sourceId);
         if (creep.harvest(source) == ERR_NOT_IN_RANGE) creep.moveTo(source)
     },
 
     target: (creep, allTasks) => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[creep.memory.roomName];
+        // console.log(JSON.stringify(tasks));
         // 第一优先级 运送能量到容器
         if(tasks.needStorEnergyCon.length > 0){
             var target = creep.pos.findClosestByPath(tasks.needStorEnergyCon);
@@ -29,6 +30,7 @@ module.exports = (sourceId, fromRoomName) => ({
                 creep.moveTo(target);
             }
         }
+        // 运送到 sto
         else if(tasks.needStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.needStorEnergySto);
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -37,7 +39,7 @@ module.exports = (sourceId, fromRoomName) => ({
         }
         // 最后优先级 升级
         else{
-            if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+            return true;
         }
     },
     // 状态切换条件

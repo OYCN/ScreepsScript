@@ -1,11 +1,17 @@
 // JSON.stringify()JSON.stringify
-const autoSpawn = require('autoSpawn');
+const autoConfig = require('autoConfig');
 
-module.exports = function () {
-    // 此变量控制是否进行全局评估
-    if(!Memory.hasSpawnInit){
-        Memory.hasSpawnInit = {};
+module.exports = function (allTasks) {
+    // 此变量控制是否重新填装生成配置
+    if(Memory.willReload == undefined){
+        Memory.willReload = true;
     }
+    // 此变量控制是否进行全局评估
+    if(!Memory.hasInit){
+        Memory.hasInit = {};
+    }
+    // 缺人模式 降低预计能源消耗
+    if(Memory.pool == undefined) Memory.pool = 0;
     // 记录全局creep与期望的数量差
     if(!Memory.dffNumber){
         Memory.dffNumber = {};
@@ -26,38 +32,65 @@ module.exports = function () {
     // if(!Memory.backup.spawnNumber){
     //     Memory.backup.spawnNumber = 0;
     // }
+    if(!Memory.spawnLists){
+        Memory.spawnLists = {};
+    }
     // creep配置生成
     if(!Memory.spawnConfigs){
         Memory.spawnConfigs = {};
     }
     // creep配置的职位列表
-    if(!Memory.spawnRoles){
-        Memory.spawnRoles = {};
+    if(!Memory.spawnRole){
+        Memory.spawnRole = {};
     }
     // 遍历全部spawn，如果没有相应的配置 或 没有监听能量变量 或 房间最大能量变化 或 配置没有职位表
     //  或 没有监听能量
     // 根据能量生成相应的配置，有变动便在后续mount.spawn中进行全局评估
-    for(spawn in Game.spawns){
-        const roomName = spawn.room.name;
-        if(!Memory.hasSpawnInit[roomName]) Memory.hasSpawnInit[roomName] = false;
-        if(!Memory.spawnRoles[roomName]) Memory.spawnRoles[roomName] = new Array();
-        if(!Memory.spawnList[roomName]) Memory.spawnList[roomName] = new Array();
+    for(const spawn in Game.spawns){
+        const roomName = Game.spawns[spawn].room.name;
+        // console.log(JSON.stringify(Memory.hasSpawnInit))
+        if(Memory.hasInit[roomName] == undefined) Memory.hasInit[roomName] = false;
+        if(!Memory.spawnRole[roomName]) Memory.spawnRole[roomName] = new Array();
+        if(!Memory.spawnLists[roomName]) Memory.spawnLists[roomName] = new Array();
         if(!Memory.dffNumber[roomName]) Memory.dffNumber[roomName] = {};
-        if(!Game.spawns[spawn].spawnList) Game.spawns[spawn].spawnList = new Array();
+        if(!Game.spawns[spawn].memory.spawnList) Game.spawns[spawn].memory.spawnList = new Array();
+        if(Game.spawns[spawn].memory.spawnConsume == undefined){
+            if(allTasks[roomName].needStorEnergy.length+allTasks[roomName].haveStorEnergy.length > 0) 
+                Game.spawns[spawn].memory.spawnConsume = true;
+            else
+                Game.spawns[spawn].memory.spawnConsume = false;
+        }
 
         // 结构配置 能量变化
-        if(!Memory.spawnConfigs[roomName] || !Memory.backup.energy[roomName] || Memory.backup.energy[roomName] != Game.rooms[roomName].energyCapacityAvailable){
-            Memory.backup.energy[roomName] = Game.rooms[roomName].energyCapacityAvailable;
-            Memory.backup.energy[roomName] = Game.rooms[spawn.room.name].energyCapacityAvailable;
-            Memory.spawnConfigs[roomName] = autoSpawn(Memory.backup.energy[roomName]);
+        if(Memory.pool == -1 || Memory.willReload || !Memory.spawnConfigs[roomName] || !Memory.backup.energy[roomName] || Memory.backup.energy[roomName] != Game.rooms[roomName].energyCapacityAvailable){
             
-            for(const role in Memory.spawnConfigs[roomName]) Memory.spawnRoles[roomName].push(role);
-            Memory.hasSpawnInit[roomName] = false;
+            Memory.backup.energy[roomName] = Game.rooms[roomName].energyCapacityAvailable;
+            var numH = 0;
+            var numC = 0;
+            for(const creep in Game.creeps){
+                if(Game.creeps[creep].memory.role.slice(0,7)=='carrier') numC += 1;
+                else if(Game.creeps[creep].memory.role.slice(0,8)=='havester') numH += 1;
+            }
+            // console.log(`C: ${numC} , H: ${numH}`);
+            if(Memory.backup.energy[roomName] > 300 && (numC == 0 || (numC > 0 && allTasks[roomName].nowEnergy <= 300))){
+                Memory.spawnConfigs[roomName] = autoConfig(300);
+                Memory.pool = 1;
+                console.log('spawn pool, force 300*energy!');
+            }
+            else{
+                Memory.spawnConfigs[roomName] = autoConfig(Memory.backup.energy[roomName]);
+                if(Memory.pool == -1 ) console.log('already recover, using normal config~');
+                Memory.pool = 0;
+            }
+            
+            for(const role in Memory.spawnConfigs[roomName]) Memory.spawnRole[roomName].push(role);
+            Memory.hasInit[roomName] = false;
         }
     }
+    Memory.willReload = false;
     for(const creep in Memory.creeps){
-        if(!Memory.creeps[creep].roomName){
-            Memory.creeps[creep].roomName = Object.keys(Game.spawns)[0];
+        if(!Memory.creeps[creep].roomName){ //} || !Game.rooms[Memory.creeps[creep].roomName]){
+            Memory.creeps[creep].roomName = Game.spawns[Object.keys(Game.spawns)[0]].room.name;
         }
         if(!Memory.creeps[creep].role){
             Memory.creeps[creep].role = 'none';

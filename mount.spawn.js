@@ -62,7 +62,7 @@ module.exports = function () {
     }
     // 检查任务队列
     Spawn.prototype.work = function(allTasks) { 
-        tasks = allTasks[this.room.name];
+        var tasks = allTasks[this.room.name];
         // 自己已经在生成了 / 内存里没有生成队列 / 生产队列为空 就啥都不干
         if (this.spawning) return;
         // 从房间队列获取任务

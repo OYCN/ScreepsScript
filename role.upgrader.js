@@ -5,10 +5,10 @@
  * 
  * @param sourceId 要挖的矿 id
  */
-module.exports = (sourceId, fromRoomName) => ({
+module.exports = (sourceId) => ({
     // 获取能量
     source: (creep, allTasks)  => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[creep.memory.roomName];
         if(tasks.haveStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergySto);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -22,13 +22,13 @@ module.exports = (sourceId, fromRoomName) => ({
             }
         }
         else{
-            const source = Game.getObjectById(sourceId)
+            const source = Game.getObjectById(sourceId);
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) creep.moveTo(source)
         }
     },
     // 升级控制器
     target: (creep, allTasks) => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[creep.memory.roomName];
         if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
     },
     // 状态切换条件

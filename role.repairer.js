@@ -8,7 +8,7 @@
 module.exports = sourceId => ({
     // 获取能量
     source: (creep, allTasks)  => {
-        tasks = allTasks[creep.room.name];
+        var tasks = allTasks[creep.room.name];
         if(tasks.haveStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergySto);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -22,13 +22,12 @@ module.exports = sourceId => ({
             }
         }
         else{
-            const source = Game.getObjectById(sourceId)
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE) creep.moveTo(source)
+            creep.say('No Energy!');
         }
     },
     
     target: (creep, allTasks) => {
-        tasks = allTasks[creep.room.name];
+        var tasks = allTasks[creep.room.name];
         // 第一优先级 修理普通建筑
         if(tasks['needRepairOther'].length > 0) {
             var target = creep.pos.findClosestByPath(tasks.needRepairOther);
@@ -52,7 +51,7 @@ module.exports = sourceId => ({
         }
         // 最后优先级 升级
         else{
-            if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+            return true;
         }
     },
     // 状态切换条件

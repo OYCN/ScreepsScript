@@ -67,16 +67,16 @@ module.exports = function () {
         }
 
 
-        needUpgrader = [Game.rooms[room].controller,];
-        needStorEnergy = needStorEnergyCon.concat(needStorEnergySto);
-        haveStorEnergy = haveStorEnergyCon.concat(haveStorEnergySto);
+        var needUpgrader = [Game.rooms[room].controller,];
+        var needStorEnergy = needStorEnergyCon.concat(needStorEnergySto);
+        var haveStorEnergy = haveStorEnergyCon.concat(haveStorEnergySto);
 
-        resource = Game.rooms[room].find(FIND_DROPPED_RESOURCES, {
+        var resource = Game.rooms[room].find(FIND_DROPPED_RESOURCES, {
                                         filter: (structure) => {
-                                            return (structure.energy >= 50);
+                                            return (structure.energy >= 100);
                                         }});
-        allEnergy = 0;
-        nowEnergy = 0;
+        var allEnergy = 0;
+        var nowEnergy = 0;
         for(const structure in haveStorEnergy){
             nowEnergy += haveStorEnergy[structure].store.getUsedCapacity(RESOURCE_ENERGY);
             allEnergy += haveStorEnergy[structure].store.getCapacity(RESOURCE_ENERGY);

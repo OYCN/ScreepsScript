@@ -69,8 +69,9 @@ const config6 = {
     
     upgrader1: [[WORK, WORK, CARRY,MOVE, MOVE], 1],
     builder1: [[WORK, WORK, CARRY, CARRY,MOVE, MOVE], 2],
-    carrier1: [[WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], 2], 
-    repairer1: [[WORK, CARRY, CARRY, CARRY,MOVE, MOVE], 2],
+    carrier1: [[WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], 1], 
+    carrier2: [[WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], 1], 
+    repairer1: [[WORK, CARRY, CARRY, CARRY,MOVE, MOVE], 0],
 
     defender1: [[TOUGH, TOUGH, CARRY,MOVE, MOVE], 0],
     attacker1: [[ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE], 0],

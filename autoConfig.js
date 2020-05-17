@@ -105,18 +105,21 @@ const getBody = energy => {
 module.exports = function(energy) {
     const body = getBody(energy);
     const numConfig = {
-        havester1: [body['havester'], 0],
-        havester2: [body['havester'], 0],
-
-        carrier1: [body['carrier'], 0],
-        builder1: [body['builder'], 0],
+        havester1: [body['havester'], 3],
+        carrier1: [body['carrier'], 2], // 存储之间运输
+        builder1: [body['builder'], 2],
+        upgrader1: [body['upgrader'], 1],
+        havester2: [body['havester'], 3],
+        carrier2: [body['carrier'], 1], // 其他能源需求处运输
         repairer1: [body['repairer'], 0],
-        upgrader1: [body['upgrader'], 0],
-
+        
         defender1: [body['defender'], 0],
         attacker1: [body['attacker'], 0],
         claimer1: [body['claimer'], 0],
     }
+
+    // 根据能量改数量
+    // if(energy > )
 
     return numConfig;
 };

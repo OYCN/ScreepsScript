@@ -33,12 +33,11 @@ module.exports = (groupName, escapeId) => ({
                 }
                 return;
             }
-            console.log(JSON.stringify(path));
-            if(path[0].room == creep.room.name) delete path[0];
+            // console.log(JSON.stringify(path));
+            if(path[0].room == creep.room.name) path.shift();
             creep.moveTo(creep.pos.findClosestByPath(path[0].exit));
         }
         else{
-            if (path) delete path;
             if (creep.attack(target) == ERR_NOT_IN_RANGE) creep.moveTo(target)
         }
     },

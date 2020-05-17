@@ -8,7 +8,7 @@
 module.exports = (sourceId, fromRoomName) => ({
     // 获取能量
     source: (creep, allTasks) => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[creep.memory.roomName];
         if(tasks.haveStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergySto);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -28,7 +28,7 @@ module.exports = (sourceId, fromRoomName) => ({
     },
     
     target: (creep, allTasks) => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[creep.memory.roomName];
         // 第一优先级 建造便宜建筑
         if(tasks['needBuildCheap'].length) {
             var target = creep.pos.findClosestByPath(tasks.needBuildCheap);

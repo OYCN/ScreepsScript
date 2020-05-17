@@ -8,31 +8,29 @@
 module.exports = (sourceId, fromRoomName,toRoomName) => ({
     // 采集能量矿
     source: (creep, allTasks)  => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[fromRoomName];
         const source = Game.getObjectById(sourceId);
         if (!source) {
             if(!path)
                 var path = Game.map.findRoute(creep.room, toRoomName);
-            if(path[0].room == creep.room.name) delete path[0];
+            if(path[0].room == creep.room.name) path.shift();
             creep.moveTo(creep.pos.findClosestByPath(path[0].exit));
         }
         else{
-            if (path) delete path;
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) creep.moveTo(source)
             else if(creep.harvest(source) == ERR_NOT_OWNER) creep.memory.mustReturn = true;
         }
     },
 
     target: (creep, allTasks) => {
-        tasks = allTasks[fromRoomName];
+        var tasks = allTasks[fromRoomName];
         if(creep.room.name != fromRoomName){
             if(!path)
                 var path = Game.map.findRoute(creep.room, fromRoomName);
-            if(path[0].room == creep.room.name) delete path[0];
+            if(path[0].room == creep.room.name) path.shift();
             creep.moveTo(creep.pos.findClosestByPath(path[0].exit));
             return;
         }
-        else if (path) delete path;
         // 第一优先级 运送能量到容器
         if(tasks.needStorEnergyCon.length > 0){
             var target = creep.pos.findClosestByPath(tasks.needStorEnergyCon);

@@ -17,11 +17,10 @@ module.exports = (roomName, escapeId) => ({
                 var path = Game.map.findRoute(creep.room, roomName);
             }
             // console.log(JSON.stringify(path));
-            if(path[0].room == creep.room.name) delete path[0];
+            if(path[0].room == creep.room.name) path.shift();
             creep.moveTo(creep.pos.findClosestByPath(path[0].exit));
         }
         else{
-            if (path) delete path;
             // 如果不是中立房间，就进行攻击
             if (creep.reserveController(Game.rooms[roomName].controller) == ERR_NOT_IN_RANGE) creep.moveTo(Game.rooms[roomName].controller)
             else if(creep.reserveController(Game.rooms[roomName].controller) == ERR_INVALID_TARGET) creep.attackController(Game.rooms[roomName].controller)
