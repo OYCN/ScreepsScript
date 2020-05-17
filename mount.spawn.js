@@ -21,7 +21,7 @@ module.exports = function () {
                 for(const idx in Memory.spawns[spawn].spawnList)
                     if(Memory.spawns[spawn].spawnList[idx] == role) nowNumber += 1;
             var dff = Memory.spawnConfigs[role][1] - nowNumber;
-            if(dff >0){
+            if(dff >=0){
                 Memory.dffNumber[role] = 0;
                 for(var i=0; i < dff; i++)
                     Memory.spawnList.push(role);
@@ -31,9 +31,9 @@ module.exports = function () {
                 // 清理 spawn 队列
                 for(const spawn in Memory.spawns){
                     for(const idx in Memory.spawns[spawn].spawnList){
-                        if(Memory.spawnRoles.indexOf(Memory.spawns[spawn].spawnList[idx])==-1) delete Memory.spawns[spawn].spawnList[idx];
+                        if(Memory.spawnRoles.indexOf(Memory.spawns[spawn].spawnList[idx])==-1) Memory.spawns[spawn].spawnList.splice(idx,1);
                         else if(dff < 0 && Memory.spawns[spawn].spawnList[idx] == role) {
-                            delete Memory.spawns[spawn].spawnList[idx];
+                            Memory.spawns[spawn].spawnList.splice(idx,1);
                             dff += 1;
                         }
                     }
@@ -41,9 +41,9 @@ module.exports = function () {
                 }
                 // 清理 总队列
                 for(const memList in Memory.spawnList)
-                    if(Memory.spawnRoles.indexOf(Memory.spawnList[memList])==-1) delete Memory.spawnList[memList];
+                    if(Memory.spawnRoles.indexOf(Memory.spawnList[memList])==-1) Memory.spawnList.splice(memList,1);
                     else if(dff < 0 && Memory.spawnList[memList] == role)  {
-                        delete Memory.spawnList[memList];
+                        Memory.spawnList.splice(memList,1);
                         dff += 1;
                     }
                 Memory.spawnList = util.trimSpace(Memory.spawnList);

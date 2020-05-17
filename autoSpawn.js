@@ -1,121 +1,96 @@
+const util = require('util')
 
-// 实现creep的body设定
-
-const bodys = {
-    MOVE: 50,
-    WORK: 100,
-    CARRY: 50,
-    ATTACK: 80,
-    RANGED_ATTACK: 150,
-    HEAL: 250,
-    CLAIM: 600,
-    TOUGH: 10,
-}
-
-// 包含一个CARRY 和若干 WORK MOVE
-const havester = function(energy){
-    var body = [CARRY];
-    energy -= bodys['CARRY']; // -50
-    const base = bodys['WORK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([WORK,MOVE]);
-    return body;
-}
-
-// 一个 CARRY 多个 WORK 
-const builder = function(energy){
-    var body = [CARRY];
-    energy -= bodys['CARRY']; // -50
-    const base = bodys['WORK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([WORK,MOVE]);
-    return body;
-}
-
-// 一个 CARRY 多个 WORK 
-const upgrader = function(energy){
-    var body = [CARRY];
-    energy -= bodys['CARRY']; // -50
-    const base = bodys['WORK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([WORK,MOVE]);
-    return body;
-}
-
-// 只包含 MOVE CARRY
-const carrier = function(energy){
-    var body = [];
-    energy += bodys['MOVE']; // 增加一个 MOVE 位置
-    const base = bodys['CARRY'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([CARRY,MOVE]);
-    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
-    return body;
-}
-
-// 一个 WORK 多个 CARRY
-const repairer = function(energy){
-    var body = [WORK];
-    energy -= bodys['WORK']; // -50
-    const base = bodys['CARRY'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([CARRY,MOVE]);
-    return body;
-}
-
-// 只需要 TOUGH 和 MOVE
-const defender = function(energy){
-    var body = []
-    energy += bodys['MOVE']; // 增加一个 MOVE 位置
-    const base = bodys['TOUGH'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([TOUGH,MOVE]);
-    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
-    return body;
-}
-
-// 只需要 ATTACK 和 MOVE
-const attacker = function(energy){
-    var body = []
-    energy += bodys['MOVE']; // 增加一个 MOVE 位置
-    const base = bodys['ATTACK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([ATTACK,MOVE]);
-    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
-    return body;
-}
-
-// 只需要 CLAIM 和 MOVE
-const claimer = function(energy){
-    var body = [];
-    energy += bodys['MOVE']; // 增加一个 MOVE 位置
-    const base = bodys['CLAIM'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([CLAIM,MOVE]);
-    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
-    return body;
-}
-
-const getBody = energy => {
-    return {
-        havester: havester(energy),
-        builder:  builder(energy),
-        upgrader: upgrader(energy),
-        carrier: carrier(energy),
-        repairer: repairer(energy),
-        defender: defender(energy),
-        attacker: attacker(energy),
-        claimer: claimer(energy),
+module.exports = function () {
+    for(const roomName in Memory.hasSpawnInit){
+        if(!Memory.hasSpawnInit[roomName]){
+            Memory.hasSpawnInit = true;
+            // 遍历每个职位的需求量， 为新建的队列添加任务
+            for(const role in Memory.spawnConfigs[roomName]){
+                var nowNumber = _.filter(Game.creeps, (creep) => creep.memory.role == role && creep.memory.roomName == roomName).length;
+                // 检查总队列
+                for(const memList in Memory.spawnList[roomName])
+                    if(Memory.spawnList[roomName][memList] == role) nowNumber += 1;
+                // 检查每一个对应的子队列
+                for(const spawn in Game.spawns)
+                    if(Game.spawns[spawn].room.name == roomName)
+                        for(const idx in Game.spawns[spawn].spawnList)
+                            if(Game.spawns[spawn].spawnList[idx] == role) nowNumber += 1;
+                var dff = Memory.spawnConfigs[roomName][role][1] - nowNumber;
+                if(dff >=0){
+                    Memory.dffNumber[roomName][role] = 0;
+                    for(var i=0; i < dff; i++)
+                        Memory.spawnList[roomName].push(role);
+                    console.log(`📥[NotClean]Dff of ${role} is ${dff}, nowNumber: ${nowNumber}, target: ${Memory.spawnConfigs[role][1]}`);
+                }
+                else{
+                    // 清理 spawn 队列
+                    for(const spawn in Game.spawns){
+                        if(Game.spawns[spawn].room.name == roomName){
+                            for(const idx in Game.spawns[spawn].spawnList){
+                                if(Memory.spawnRoles[roomName].indexOf(Game.spawns[spawn].spawnList[idx])==-1) Game.spawns[spawn].spawnList.splice(idx,1);
+                                else if(dff < 0 && Game.spawns[spawn].spawnList[idx] == role) {
+                                    Game.spawns[spawn].spawnList.splice(idx,1);
+                                    dff += 1;
+                                }
+                            }
+                            Game.spawns[spawn].spawnList = util.trimSpace(Game.spawns[spawn].spawnList);
+                        }
+                    }
+                    // 清理 总队列
+                    for(const memList in Memory.spawnList[roomName])
+                        if(Memory.spawnRoles[roomName].indexOf(Memory.spawnList[roomName][memList])==-1) Memory.spawnList[roomName].splice(memList,1);
+                        else if(dff < 0 && Memory.spawnList[roomName][memList] == role)  {
+                            Memory.spawnList[roomName].splice(memList,1);
+                            dff += 1;
+                        }
+                    Memory.spawnList[roomName] = util.trimSpace(Memory.spawnList[roomName]);
+                    Memory.dffNumber[roomName][role] = dff;
+                    console.log(`📥[Clean]Dff of ${role} is ${dff}, lastNumber: ${nowNumber}, target: ${Memory.spawnConfigs[role][1]}`);
+                }
+            }
+        }
     }
-}
-
-module.exports = function(energy) {
-    const body = getBody(energy);
-    const numConfig = {
-        havester1: [body['havester'], 0],
-        havester2: [body['havester'], 0],
-
-        carrier1: [body['carrier'], 0],
-        builder1: [body['builder'], 0],
-        repairer1: [body['repairer'], 0],
-        upgrader1: [body['upgrader'], 0],
-
-        defender1: [body['defender'], 0],
-        attacker1: [body['attacker'], 0],
-        claimer1: [body['claimer'], 0],
+    // 检查任务队列
+    Spawn.prototype.work = function(allTasks) { 
+        tasks = allTasks[this.room.name];
+        // 自己已经在生成了 / 内存里没有生成队列 / 生产队列为空 就啥都不干
+        if (this.spawning) return;
+        // 从房间队列获取任务
+        if(this.memory.spawnList.length == 0 && Memory.spawnList[this.room.name].length != 0){
+            console.log('📔Push a task to ' + this.name);
+            this.memory.spawnList.push(Memory.spawnList[this.room.name].shift());
+        }
+        else if(this.memory.spawnList.length == 0) return;
+        // 进行生成
+        const spawnSuccess = this.mainSpawn(this.memory.spawnList[0])
+        // 生成成功后移除任务
+        if (spawnSuccess == OK) {
+            console.log('📗Spawn success at ' + this.name);
+            this.memory.spawnList.shift();
+        }
+        else if(spawnSuccess == -100){
+            //console.log('unknow taskname, pass');
+            this.memory.spawnList.shift();
+        }
+        else if(spawnSuccess == ERR_NOT_ENOUGH_ENERGY){
+            if(tasks['spawnAll'] == tasks['spawnNow']){
+                console.log('📕We Dont have such energy, pass');
+                this.memory.spawnList.shift();
+            }
+        }
+        else{
+            console.log('📕Spawn error at ' + this.name + ' with ' + spawnSuccess + ' , pass');
+            this.memory.spawnList.shift();
+        }
     }
 
-    return numConfig;
+    // creep 生成主要实现
+    Spawn.prototype.mainSpawn = function(taskName) {
+        if(Memory.spawnRoles[this.room.name].indexOf(taskName) == -1) {
+            console.log('📕无此配置:' + taskName + ' 跳过生成');
+            return -100; 
+        }
+        return this.spawnCreep(Memory.spawnConfigs[taskName][0], taskName + '_' + this.room.name + '_' + Game.time, 
+            {memory: {role: taskName, roomName: this.room.name}}); 
+    }
 };
