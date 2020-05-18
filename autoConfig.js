@@ -27,8 +27,8 @@ const builder = function(energy){
     energy += bodys['MOVE']; // +50
 
     const base1 = bodys['WORK']*5 + bodys['MOVE']*6 + bodys['CARRY']*1;
-    var num = parseInt(energy/base1)
-    for(var i;i<num;i++) body=body.concat([WORK,WORK,WORK,WORK,WORK,
+    var num = parseInt(energy/base1);
+    for(var i=0;i<num;i++) body=body.concat([WORK,WORK,WORK,WORK,WORK,
                                         CARRY,
                                         MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
                                         ]);
