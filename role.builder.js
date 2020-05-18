@@ -53,7 +53,9 @@ module.exports = (sourceId, fromRoomName) => ({
         // }
         // 最后优先级 升级
         else{
-            if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+            // if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+            creep.say('Zzz~')
+            return true;
         }
     },
     // 状态切换条件

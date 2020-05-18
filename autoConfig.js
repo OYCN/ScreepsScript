@@ -136,7 +136,7 @@ const getBody = energy => {
 }
 
 // 如果最大能量变化 就 重新计算配置
-module.exports = function(energy) {
+module.exports = function(energy, roomName) {
     const body = getBody(energy);
     var numConfig = {
         havester1: [body['havester'], 3, 'harvester'],
@@ -163,6 +163,23 @@ module.exports = function(energy) {
         for(const idx in numConfig){
             if(numConfig[idx][2]=='harvester')
                 numConfig[idx][1] = 2;
+        }
+    }
+
+    if(Memory.backup.needBuildNum[roomName] == 0){
+        for(const idx in numConfig){
+            if(numConfig[idx][2]=='builder')
+                numConfig[idx][1] = 0;
+        }
+    }
+    else if(Memory.backup.needBuildNum[roomName] < 0){
+        console.log('ERROR at autoConfig when check needBuildNum');
+    }
+
+    if(Memory.backup.roomCtlLevel[roomName] == 8){
+        for(const idx in numConfig){
+            if(numConfig[idx][2]=='upgrader')
+                numConfig[idx][1] = 0;
         }
     }
 

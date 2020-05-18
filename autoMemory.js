@@ -28,6 +28,14 @@ module.exports = function (allTasks) {
     if(!Memory.backup.energy){
         Memory.backup.energy = {};
     }
+    // 检测每个房间需要建筑的建筑数量
+    if(!Memory.backup.needBuildNum){
+        Memory.backup.needBuildNum = {};
+    }
+    // 检测每个房间控制器等级
+    if(!Memory.backup.roomCtlLevel){
+        Memory.backup.roomCtlLevel = {};
+    }
     // // 检测spawn的数量，使用默认0
     // if(!Memory.backup.spawnNumber){
     //     Memory.backup.spawnNumber = 0;
@@ -62,9 +70,15 @@ module.exports = function (allTasks) {
         }
 
         // 结构配置 能量变化
-        if(Memory.pool == -1 || Memory.willReload || !Memory.spawnConfigs[roomName] || !Memory.backup.energy[roomName] || Memory.backup.energy[roomName] != Game.rooms[roomName].energyCapacityAvailable){
+        if(Memory.pool == -1 || Memory.willReload || !Memory.spawnConfigs[roomName] || 
+            !Memory.backup.energy[roomName] || Memory.backup.needBuildNum[roomName] == undefined || !Memory.backup.roomCtlLevel[roomName] ||
+             Memory.backup.energy[roomName] != Game.rooms[roomName].energyCapacityAvailable ||
+             Memory.backup.needBuildNum[roomName] != Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES).length ||
+             Memory.backup.roomCtlLevel[roomName] != Game.rooms[roomName].controller.level){
             
             Memory.backup.energy[roomName] = Game.rooms[roomName].energyCapacityAvailable;
+            Memory.backup.needBuildNum[roomName] = Game.rooms[roomName].find(FIND_MY_CONSTRUCTION_SITES).length;
+            Memory.backup.roomCtlLevel[roomName] = Game.rooms[roomName].controller.level;
             var numH = 0;
             var numC = 0;
             for(const creep in Game.creeps){
@@ -73,12 +87,12 @@ module.exports = function (allTasks) {
             }
             // console.log(`C: ${numC} , H: ${numH}`);
             if(Memory.backup.energy[roomName] > 300 && (numC == 0 || (numC > 0 && allTasks[roomName].nowEnergy <= 300))){
-                Memory.spawnConfigs[roomName] = autoConfig(300);
+                Memory.spawnConfigs[roomName] = autoConfig(300, roomName);
                 Memory.pool = 1;
                 console.log('spawn pool, force 300*energy!');
             }
             else{
-                Memory.spawnConfigs[roomName] = autoConfig(Memory.backup.energy[roomName]);
+                Memory.spawnConfigs[roomName] = autoConfig(Memory.backup.energy[roomName], roomName);
                 if(Memory.pool == -1 ) console.log('already recover, using normal config~');
                 Memory.pool = 0;
             }
