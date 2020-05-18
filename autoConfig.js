@@ -23,10 +23,25 @@ const havester = function(energy){
 
 // 一个 CARRY 多个 WORK 
 const builder = function(energy){
-    var body = [CARRY];
-    energy -= bodys['CARRY']; // -50
-    const base = bodys['WORK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([WORK,MOVE]);
+    var body = [];
+    energy += bodys['MOVE']; // +50
+
+    const base1 = bodys['WORK']*5 + bodys['MOVE']*6 + bodys['CARRY']*1;
+    var num = parseInt(energy/base1)
+    for(var i;i<num;i++) body=body.concat([WORK,WORK,WORK,WORK,WORK,
+                                        CARRY,
+                                        MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                        ]);
+    energy -= num*base1;
+    // 至少能凑出一个 WORK MOVE CARRY
+    // 一个 CARRY 同等 WORK MOVE
+    if(energy>=200){
+        energy -= bodys['CARRY'];
+        body=body.concat([CARRY]);
+        const base2 = bodys['WORK'] + bodys['MOVE'];
+        for(;energy>=base2;energy-=base2) body=body.concat([WORK,MOVE]);
+    }
+    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
     return body;
 }
 
@@ -104,22 +119,30 @@ const getBody = energy => {
 // 如果最大能量变化 就 重新计算配置
 module.exports = function(energy) {
     const body = getBody(energy);
-    const numConfig = {
-        havester1: [body['havester'], 3],
-        carrier1: [body['carrier'], 2], // 存储之间运输
-        builder1: [body['builder'], 2],
-        upgrader1: [body['upgrader'], 1],
-        havester2: [body['havester'], 3],
-        carrier2: [body['carrier'], 1], // 其他能源需求处运输
-        repairer1: [body['repairer'], 0],
+    var numConfig = {
+        havester1: [body['havester'], 3, 'harvester'],
+        carrier1: [body['carrier'], 2, 'carrier'], // 存储之间运输
+        builder1: [body['builder'], 2, 'builder'],
+        upgrader1: [body['upgrader'], 1, 'upgrader'],
+        havester2: [body['havester'], 3, 'harvester'],
+        carrier2: [body['carrier'], 1, 'carrier'], // 其他能源需求处运输
+        repairer1: [body['repairer'], 0, 'repairer'],
         
-        defender1: [body['defender'], 0],
-        attacker1: [body['attacker'], 0],
-        claimer1: [body['claimer'], 0],
+        defender1: [body['defender'], 0, 'defender'],
+        attacker1: [body['attacker'], 0, 'attacker'],
+        claimer1: [body['claimer'], 0, 'claimer'],
     }
 
     // 根据能量改数量
-    // if(energy > )
+    if(energy >= 1550){
+        numConfig['havester1'][1] = 1;
+        numConfig['havester2'][1] = 1;
+    }
+    else if(energy >= 800){
+        numConfig['havester1'][1] = 2;
+        numConfig['havester2'][1] = 2;
+    }
+
 
     return numConfig;
 };

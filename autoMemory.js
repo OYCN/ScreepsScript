@@ -95,5 +95,8 @@ module.exports = function (allTasks) {
         if(!Memory.creeps[creep].role){
             Memory.creeps[creep].role = 'none';
         }
+        if(!Memory.creeps[creep].class){
+            Memory.creeps[creep].class = Memory.creeps[creep].role.split('_')[0].slice(0,-1);
+        }
     }
 }

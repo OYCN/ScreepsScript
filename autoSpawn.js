@@ -46,7 +46,7 @@ module.exports = function () {
                         }
                     Memory.spawnLists[roomName] = util.trimSpace(Memory.spawnLists[roomName]);
                     Memory.dffNumber[roomName][role] = dff;
-                    console.log(`📥[Clean]Dff of ${role} is ${dff}, lastNumber: ${nowNumber}, target: ${Memory.spawnConfigs[role][1]}`);
+                    console.log(`📥[Clean]Dff of ${role} is ${dff}, lastNumber: ${nowNumber}, target: ${Memory.spawnConfigs[roomName][role][1]}`);
                 }
             }
         }
@@ -97,9 +97,9 @@ module.exports = function () {
             console.log('📕无此配置:' + taskName + ' 跳过生成');
             return -100; 
         }
-        if(this.memory.spawnConsume == false && (taskName.slice(0,7)=='carrier'))// || taskName.slice(0,8)=='upgrader'))
+        if(this.memory.spawnConsume == false && (Memory.spawnConfigs[this.room.name][taskName][2]=='carrier'))// || taskName.slice(0,8)=='upgrader'))
             return -200;
         return this.spawnCreep(Memory.spawnConfigs[this.room.name][taskName][0], taskName + '_' + this.room.name + '_' + Game.time, 
-            {memory: {role: taskName, roomName: this.room.name}}); 
+            {memory: {role: taskName, roomName: this.room.name, class:Memory.spawnConfigs[this.room.name][taskName][2]}}); 
     }
 };

@@ -11,20 +11,27 @@ module.exports = (type) => ({
         var tasks = allTasks[creep.memory.roomName];
         if(tasks.resource.length > 0){
             var target = creep.pos.findClosestByPath(tasks.resource);
-            if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            if (creep.pickup(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
         }
-        else
+        else if(tasks.haveStorEnergyCon.length+tasks.haveStorEnergySto.length > 0){
+            var list = tasks.haveStorEnergyCon.concat(tasks.haveStorEnergySto);
+            var target = list.sort((a,b) => {return b.store.getUsedCapacity(RESOURCE_ENERGY)/b.store.getCapacity(RESOURCE_ENERGY)
+                                                -a.store.getUsedCapacity(RESOURCE_ENERGY)/a.store.getCapacity(RESOURCE_ENERGY)})
+            if (creep.withdraw(target[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target[0]);
+            }
+        }
         // 从 con 里拿能量
-        if(tasks.haveStorEnergyCon.length > 0){
+        else if(tasks.haveStorEnergyCon.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergyCon);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
         }
-        // 如果 con 能量不足 并且 spawn 一系列是满的 那就从 sto 里拿
-        else if(tasks['spawnAll'] == tasks['spawnNow'] && tasks.haveStorEnergySto.length > 0){
+        // 从 sto 里拿
+        else if(tasks.haveStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergySto);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
@@ -38,9 +45,11 @@ module.exports = (type) => ({
     target: (creep, allTasks) => {
         var tasks = allTasks[creep.memory.roomName];
         if(type=='onlyOther'){
-            var target = creep.pos.findClosestByPath(tasks.needOtherEnergy);
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target);
+            //var target = creep.pos.findClosestByPath(tasks.needOtherEnergy);
+            var target = tasks.needOtherEnergy.sort((a,b) => {return a.store.getUsedCapacity(RESOURCE_ENERGY)-b.store.getUsedCapacity(RESOURCE_ENERGY)})
+            // console.log(JSON.stringify(creep.transfer(target[0], RESOURCE_ENERGY)))
+            if(creep.transfer(target[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target[0]);
                 return false;
             }
         }

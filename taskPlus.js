@@ -58,7 +58,7 @@ module.exports = function () {
                     needOtherEnergy.push(structure);
             }
 
-            if(structure.structureType == STRUCTURE_WALL && structure.hits < 3000)
+            if(structure.structureType == STRUCTURE_WALL && structure.hits < structure.hitsMax)
                 needRepairWall.push(structure);
             if(structure.structureType == STRUCTURE_RAMPART && structure.hits < structure.hitsMax)
                 needRepairRampart.push(structure);
