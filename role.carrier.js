@@ -5,7 +5,7 @@
  * 
  * @param sourceId 要挖的矿 id
  */
-module.exports = (type) => ({
+module.exports = (type, linkIds) => ({
     // 获取能量
     source: (creep, allTasks)  => {
         var tasks = allTasks[creep.memory.roomName];
@@ -72,6 +72,19 @@ module.exports = (type) => ({
             var target = creep.pos.findClosestByPath(tasks.needOtherEnergy);
             if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
+            }
+        }
+        else if(linkIds && linkIds.length>0){
+            var links = new Array();
+            for(const idx in linkIds){
+                var temp = Game.getObjectById(linkIds[idx]);
+                if(temp) links.push(temp);
+            }
+            if(links.length > 0){
+                var target = creep.pos.findClosestByPath(links);
+                if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(target);
+                }
             }
         }
         // 第四优先级 运送能量到 中央存储

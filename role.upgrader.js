@@ -5,10 +5,18 @@
  * 
  * @param sourceId 要挖的矿 id
  */
-module.exports = (sourceId) => ({
+module.exports = (sourceId, sign, linkId) => ({
     // 获取能量
     source: (creep, allTasks)  => {
         var tasks = allTasks[creep.memory.roomName];
+        if(linkId != undefined ){
+            const target = Game.getObjectById(linkId);
+            // console.log(JSON.stringify(creep.withdraw(target)))
+            if(target){
+                if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) creep.moveTo(target);
+                return false;
+            }
+        }
         if(tasks.haveStorEnergySto.length > 0){
             var target = creep.pos.findClosestByPath(tasks.haveStorEnergySto);
             if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -30,6 +38,11 @@ module.exports = (sourceId) => ({
     target: (creep, allTasks) => {
         var tasks = allTasks[creep.memory.roomName];
         if (creep.upgradeController(tasks['needUpgrader'][0]) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+        if(!tasks['needUpgrader'][0].sign || tasks['needUpgrader'][0].sign.text != sign){
+            if(typeof sign != 'string') sign = '';
+            if(creep.signController(tasks['needUpgrader'][0], sign) == ERR_NOT_IN_RANGE) creep.moveTo(tasks['needUpgrader'][0]);
+            // else console.log(creep.signController(tasks['needUpgrader'][0], sign))
+        }
     },
     // 状态切换条件
     switch: creep => creep.updateState(),

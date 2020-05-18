@@ -2,6 +2,7 @@
 const creepExtension = require('mount.creep');
 const spawnExtension = require('autoSpawn');
 const towerExtension = require('mount.tower');
+const linkExtension = require('mount.link');
 const myStor = require('autoMemory');
 const getTasks = require('task');
 const statistics = require('statistics');
@@ -18,6 +19,7 @@ module.exports = function () {
     // console.log(JSON.stringify(Memory.spawnRoles['W5N8']))
     spawnExtension();
     towerExtension();
+    linkExtension();
 
     if(Memory.pool == 1){
         var numH = 0;
@@ -60,6 +62,14 @@ module.exports = function () {
     for (let tower of towers) {
         // run tower logic
         tower.work();
+    }
+
+    // link操作
+    var links = _.filter(Game.structures, s => s.structureType == STRUCTURE_LINK);
+    // for each link
+    for (let link of links) {
+        // run link logic
+        link.work();
     }
 
     if(Game.spawns['Spawn1'].spawning) { 

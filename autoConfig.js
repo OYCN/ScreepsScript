@@ -21,7 +21,7 @@ const havester = function(energy){
     return body;
 }
 
-// 一个 CARRY 多个 WORK 
+// 一个 CARRY 最多对应5个 WORK 
 const builder = function(energy){
     var body = [];
     energy += bodys['MOVE']; // +50
@@ -36,8 +36,8 @@ const builder = function(energy){
     // 至少能凑出一个 WORK MOVE CARRY
     // 一个 CARRY 同等 WORK MOVE
     if(energy>=200){
-        energy -= bodys['CARRY'];
-        body=body.concat([CARRY]);
+        energy -= bodys['CARRY'] + bodys['MOVE'];
+        body=body.concat([CARRY, MOVE]);
         const base2 = bodys['WORK'] + bodys['MOVE'];
         for(;energy>=base2;energy-=base2) body=body.concat([WORK,MOVE]);
     }
@@ -45,12 +45,31 @@ const builder = function(energy){
     return body;
 }
 
-// 一个 CARRY 多个 WORK 
+// 一个 CARRY 最多对应25个 WORK 
 const upgrader = function(energy){
-    var body = [CARRY];
-    energy -= bodys['CARRY']; // -50
-    const base = bodys['WORK'] + bodys['MOVE'];
-    for(;energy>=base;energy-=base) body=body.concat([WORK,MOVE]);
+    var body = [];
+    energy += bodys['MOVE']; // +50
+
+    const base1 = bodys['WORK']*25 + bodys['MOVE']*26 + bodys['CARRY']*1;
+    var num = parseInt(energy/base1);
+    for(var i=0;i<num;i++) body=body.concat([WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                                            WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,WORK,
+                                            WORK,WORK,WORK,WORK,WORK,
+                                            CARRY,
+                                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                            MOVE,MOVE,MOVE,MOVE,MOVE,MOVE,
+                                            ]);
+    energy -= num*base1;
+    // 至少能凑出一个 WORK MOVE CARRY
+    // 一个 CARRY 同等 WORK MOVE
+    if(energy>=200){
+        energy -= bodys['CARRY'] + bodys['MOVE'];
+        body=body.concat([CARRY, MOVE]);
+        const base2 = bodys['WORK'] + bodys['MOVE'];
+        for(;energy>=base2;energy-=base2) body=body.concat([WORK,MOVE]);
+    }
+    body.splice(body.indexOf(MOVE),1); //删除一个 MOVE
     return body;
 }
 
@@ -134,13 +153,17 @@ module.exports = function(energy) {
     }
 
     // 根据能量改数量
-    if(energy >= 1550){
-        numConfig['havester1'][1] = 1;
-        numConfig['havester2'][1] = 1;
+    if(energy >= 800){
+        for(const idx in numConfig){
+            if(numConfig[idx][2]=='harvester')
+                numConfig[idx][1] = 1;
+        }
     }
-    else if(energy >= 800){
-        numConfig['havester1'][1] = 2;
-        numConfig['havester2'][1] = 2;
+    else if(energy >= 500){
+        for(const idx in numConfig){
+            if(numConfig[idx][2]=='harvester')
+                numConfig[idx][1] = 2;
+        }
     }
 
 

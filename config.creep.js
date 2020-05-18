@@ -22,10 +22,10 @@ module.exports = {
     havester3: farHavester('0d080772ccae8f2', 'W5N8', 'W6N8'),
     havester4: farHavester('6bb50772cca441b', 'W5N8', 'W6N8'),
 
-    upgrader1: upgrader(sourceId2),
+    upgrader1: upgrader(sourceId2, "it's my first time to play in a public server.QAQ", '7d2e649d27c31d7'),
     builder1: builder(sourceId2),
     repairer1: repairer(sourceId2),
-    carrier1: carrier('withoutOther'),
+    carrier1: carrier('withoutOther', ['140361cc5a057ce']),
     carrier2: carrier('onlyOther'),
 
     attacker1: attacker('attacker1', 'fe8abbd12006dee'),
